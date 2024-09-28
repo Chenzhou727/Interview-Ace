@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="generator.mapper.QuestionBankMapper">
+<mapper namespace="com.chen.InterviewAce.mapper.QuestionBankMapper">
 
-    <resultMap id="BaseResultMap" type="generator.domain.QuestionBank">
+    <resultMap id="BaseResultMap" type="com.chen.InterviewAce.model.entity.QuestionBank">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="title" column="title" jdbcType="VARCHAR"/>
             <result property="description" column="description" jdbcType="VARCHAR"/>

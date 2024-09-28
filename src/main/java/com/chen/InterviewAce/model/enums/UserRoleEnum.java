@@ -44,12 +44,11 @@ public enum UserRoleEnum {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        for (UserRoleEnum anEnum : UserRoleEnum.values()) {
-            if (anEnum.value.equals(value)) {
-                return anEnum;
-            }
-        }
-        return null;
+
+        return Arrays.stream(UserRoleEnum.values())
+                .filter(item -> item.value.equals(value))
+                .findFirst()
+                .orElse(null);
     }
 
     public String getValue() {

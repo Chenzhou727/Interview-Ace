@@ -1,4 +1,4 @@
-package generator.domain;
+package com.chen.InterviewAce.model.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -9,12 +9,12 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 题目
- * @TableName question
+ * 题库题目
+ * @TableName question_bank_question
  */
-@TableName(value ="question")
+@TableName(value ="question_bank_question")
 @Data
-public class Question implements Serializable {
+public class QuestionBankQuestion implements Serializable {
     /**
      * id
      */
@@ -22,34 +22,19 @@ public class Question implements Serializable {
     private Long id;
 
     /**
-     * 标题
+     * 题库 id
      */
-    private String title;
+    private Long questionBankId;
 
     /**
-     * 内容
+     * 题目 id
      */
-    private String content;
-
-    /**
-     * 标签列表（json 数组）
-     */
-    private String tags;
-
-    /**
-     * 推荐答案
-     */
-    private String answer;
+    private Long questionId;
 
     /**
      * 创建用户 id
      */
     private Long userId;
-
-    /**
-     * 编辑时间
-     */
-    private Date editTime;
 
     /**
      * 创建时间
@@ -60,11 +45,6 @@ public class Question implements Serializable {
      * 更新时间
      */
     private Date updateTime;
-
-    /**
-     * 是否删除
-     */
-    private Integer isDelete;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
