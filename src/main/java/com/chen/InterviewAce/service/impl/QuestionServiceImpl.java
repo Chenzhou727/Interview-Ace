@@ -27,6 +27,8 @@ import com.chen.InterviewAce.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -53,7 +55,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     private UserService userService;
 
     @Resource
+    @Lazy
     private QuestionBankQuestionService questionBankQuestionService;
+
 
     /**
      * 校验数据
@@ -103,6 +107,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         List<String> tagList = questionQueryRequest.getTags();
         Long userId = questionQueryRequest.getUserId();
         String answer = questionQueryRequest.getAnswer();
+
         // todo 补充需要的查询条件
         // 从多字段中搜索
         if (StringUtils.isNotBlank(searchText)) {
@@ -255,6 +260,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 Set<Long> questionIdList = questionList.stream().map(QuestionBankQuestion::getQuestionId)
                         .collect(Collectors.toSet());
                 queryWrapper.in("id", questionIdList);
+            }else {
+                //题库为空，返回空列表
+                return new Page<>(current, size,0);
             }
 
         }
