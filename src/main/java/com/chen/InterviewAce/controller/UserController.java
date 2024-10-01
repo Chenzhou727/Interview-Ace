@@ -21,7 +21,10 @@ import com.chen.InterviewAce.model.vo.LoginUserVO;
 import com.chen.InterviewAce.model.vo.UserVO;
 import com.chen.InterviewAce.service.UserService;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -313,5 +316,33 @@ public class UserController {
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 添加当天签到记录
+     *
+     * @param request
+     * @return 当天是否已签到成功
+     */
+    @PostMapping("/add/sign_in")
+    public BaseResponse<Boolean> addUserSignIn(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        boolean result = userService.addUserSignIn(loginUser.getId());
+
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 获取一年的打卡记录
+     *
+     * @param request
+     * @return 一年打卡记录
+     */
+    @PostMapping("/get/sign_in")
+    public BaseResponse<List<Integer>> getUserSignIn(Integer year, HttpServletRequest request) {
+        //登录才能获取
+        User loginUser = userService.getLoginUser(request);
+        List<Integer> userSignInRecord = userService.getUserSignInRecord(loginUser.getId(), year);
+        return ResultUtils.success(userSignInRecord);
     }
 }

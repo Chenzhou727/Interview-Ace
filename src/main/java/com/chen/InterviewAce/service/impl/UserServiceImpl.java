@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chen.InterviewAce.common.ErrorCode;
 import com.chen.InterviewAce.constant.CommonConstant;
+import com.chen.InterviewAce.constant.RedisConstant;
 import com.chen.InterviewAce.exception.BusinessException;
 import com.chen.InterviewAce.mapper.UserMapper;
 import com.chen.InterviewAce.model.dto.user.UserQueryRequest;
@@ -16,13 +17,18 @@ import com.chen.InterviewAce.model.vo.LoginUserVO;
 import com.chen.InterviewAce.model.vo.UserVO;
 import com.chen.InterviewAce.service.UserService;
 import com.chen.InterviewAce.utils.SqlUtils;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.time.LocalDate;
+import java.time.Year;
+import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBitSet;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -36,6 +42,8 @@ import org.springframework.util.DigestUtils;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    @Resource
+    private RedissonClient redissonClient;
     /**
      * 盐值，混淆密码
      */
@@ -267,5 +275,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;
+    }
+
+    @Override
+    public boolean addUserSignIn(Long userId) {
+        LocalDate now = LocalDate.now();
+        String key = RedisConstant.getUserSignInRedisKey(now.getYear(), userId);
+        //获取redis的bitmap
+        RBitSet bitSet = redissonClient.getBitSet(key);
+        //获取今天是一年的第几天
+        int dayOfYear = now.getDayOfYear();
+        if(!bitSet.get(dayOfYear)) {
+            //如果没有签到则签到
+            bitSet.set(dayOfYear,true);
+        }
+        //当天已签到
+        return true;
+    }
+
+    @Override
+    public List<Integer> getUserSignInRecord(long userId, Integer year) {
+        if(year == null) {
+            year = LocalDate.now().getYear();
+        }
+        String key = RedisConstant.getUserSignInRedisKey(year, userId);
+        RBitSet bitSet = redissonClient.getBitSet(key);
+        BitSet bitSet1 = bitSet.asBitSet();
+
+        List<Integer> dayList = new ArrayList<>();
+        int index = bitSet1.nextSetBit(0);
+        while (index>=0){
+            dayList.add(index);
+            index = bitSet1.nextSetBit(index+1);
+        }
+
+        return dayList;
     }
 }
