@@ -14,17 +14,16 @@ import com.chen.InterviewAce.common.ResultUtils;
 import com.chen.InterviewAce.constant.UserConstant;
 import com.chen.InterviewAce.exception.BusinessException;
 import com.chen.InterviewAce.exception.ThrowUtils;
-import com.chen.InterviewAce.model.dto.question.QuestionAddRequest;
-import com.chen.InterviewAce.model.dto.question.QuestionEditRequest;
-import com.chen.InterviewAce.model.dto.question.QuestionQueryRequest;
-import com.chen.InterviewAce.model.dto.question.QuestionUpdateRequest;
+import com.chen.InterviewAce.model.dto.question.*;
 import com.chen.InterviewAce.model.entity.Question;
 import com.chen.InterviewAce.model.entity.QuestionBankQuestion;
 import com.chen.InterviewAce.model.entity.User;
+import com.chen.InterviewAce.model.vo.QuestionBankVO;
 import com.chen.InterviewAce.model.vo.QuestionVO;
 import com.chen.InterviewAce.service.QuestionBankQuestionService;
 import com.chen.InterviewAce.service.QuestionService;
 import com.chen.InterviewAce.service.UserService;
+import com.jd.platform.hotkey.client.callback.JdHotKeyStore;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -154,11 +153,30 @@ public class QuestionController {
     @GetMapping("/get/vo")
     public BaseResponse<QuestionVO> getQuestionVOById(long id, HttpServletRequest request) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
+
+        // 生成 key
+        String key = "question_detail_" + id;
+        // 如果是热 key
+        if (JdHotKeyStore.isHotKey(key)) {
+            // 从本地缓存中获取缓存值
+            Object cachedQuestionVO = JdHotKeyStore.get(key);
+            if (cachedQuestionVO != null) {
+                // 如果缓存中有值，直接返回缓存的值
+                return ResultUtils.success((QuestionVO) cachedQuestionVO);
+            }
+        }
+
         // 查询数据库
         Question question = questionService.getById(id);
         ThrowUtils.throwIf(question == null, ErrorCode.NOT_FOUND_ERROR);
+
+
+        QuestionVO questionVO = questionService.getQuestionVO(question, request);
+        // // 设置本地缓存(如果不是热key,smartSet不会设置缓存)
+        JdHotKeyStore.smartSet(key, questionVO);
+
         // 获取封装类
-        return ResultUtils.success(questionService.getQuestionVO(question, request));
+        return ResultUtils.success(questionVO);
     }
 
     /**
@@ -258,6 +276,27 @@ public class QuestionController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+
+
+    @PostMapping("/search/page/vo")
+    public BaseResponse<Page<QuestionVO>> searchQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
+                                                                 HttpServletRequest request) {
+        long size = questionQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 200, ErrorCode.PARAMS_ERROR);
+        Page<Question> questionPage = questionService.searchFromEs(questionQueryRequest);
+        return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
+    }
+
+    @PostMapping("/delete/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> batchDeleteQuestion(@RequestBody QuestionBatchDeleteRequest questionBatchDeleteRequest){
+        ThrowUtils.throwIf(questionBatchDeleteRequest==null,ErrorCode.PARAMS_ERROR);
+        questionService.batchDeleteQuestions(questionBatchDeleteRequest.getQuestionIdList());
+        return ResultUtils.success(true);
+    }
+
+
 
     // endregion
 }

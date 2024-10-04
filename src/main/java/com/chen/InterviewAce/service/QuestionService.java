@@ -9,6 +9,7 @@ import com.chen.InterviewAce.model.vo.QuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,4 +57,11 @@ public interface QuestionService extends IService<Question> {
     Page<Question> listQuestionByPage(QuestionQueryRequest questionQueryRequest);
 
 
+    Page<Question> searchFromEs(QuestionQueryRequest questionQueryRequest);
+
+    /**
+     * 批量删除题目
+     * @param questionIdList
+     */
+    void batchDeleteQuestions(List<Long> questionIdList);
 }

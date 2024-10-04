@@ -2,6 +2,10 @@ package com.chen.InterviewAce.mapper;
 
 import com.chen.InterviewAce.model.entity.Question;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.Date;
+import java.util.List;
 
 /**
 * @author 11915
@@ -11,6 +15,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface QuestionMapper extends BaseMapper<Question> {
 
+    @Select("SELECT * FROM question WHERE updateTime >= #{minUpdateTime}")
+    List<Question> listQuestionWithDelete(Date fiveMinutesAgoDate);
 }
 
 
