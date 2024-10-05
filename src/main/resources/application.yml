@@ -20,7 +20,7 @@ spring:
       # 数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.217.134:3306/InterviewAce
+    url: jdbc:mysql://192.168.217.135:3306/InterviewAce
     username: root
     password: 123
     # 指定数据源类型
@@ -96,14 +96,14 @@ spring:
   # todo 需替换配置，然后取消注释
   redis:
     database: 0
-    host: 192.168.217.134
+    host: 192.168.217.135
     port: 6379
     timeout: 5000
 #    password: 123456
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
   elasticsearch:
-    uris: http://192.168.217.134:9200
+    uris: http://192.168.217.135:9200
 #    username: root
 #    password: 123456
   # 文件上传
@@ -134,7 +134,17 @@ hotkey:
   app-name: InterviewAce
   caffeine-size: 10000
   push-period: 1000
-  etcd-server: http://192.168.217.134:2379
+  etcd-server: http://192.168.217.135:2379
+# nacos配置中心
+nacos:
+  config:
+    server-addr: 127.0.0.1:8848  # nacos 地址
+    bootstrap:
+      enable: true  # 预加载
+    data-id: InterviewAce.blacklist # 控制台填写的 Data ID
+    group: DEFAULT_GROUP # 控制台填写的 group
+    type: yaml  # 选择的文件格式
+    auto-refresh: true # 开启自动刷新
 
 # 微信相关
 wx:

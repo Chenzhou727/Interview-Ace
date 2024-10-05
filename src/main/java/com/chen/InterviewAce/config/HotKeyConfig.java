@@ -14,7 +14,7 @@ public class HotKeyConfig {
     /**
      * Etcd 服务器完整地址
      */
-    private String etcdServer = "http://192.168.217.134:2379";
+    private String etcdServer = "http://192.168.217.135:2379";
 
     /**
      * 应用名称
